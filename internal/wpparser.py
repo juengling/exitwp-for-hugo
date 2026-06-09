@@ -7,6 +7,46 @@ from xml.etree.ElementTree import ElementTree, XMLParser, TreeBuilder
 from bs4 import BeautifulSoup
 
 
+def extract_paragraphs(html):
+    """
+    Extract clean text paragraphs from an HTML fragment.
+
+    The function normalizes HTML by converting <br> tags to line breaks,
+    replacing block-level elements with paragraph separators, removing all
+    remaining HTML tags, decoding common HTML entities, and finally splitting
+    the cleaned text into paragraphs based on blank lines.
+
+    Args:
+        html (str | None): Raw HTML content. If None or empty, an empty list
+            is returned.
+
+    Returns:
+        list[str]: A list of cleaned text paragraphs with empty entries removed.
+    """
+    if not html:
+        return []
+
+    # 1. Convert <br> tags to line breaks
+    html = re.sub(r'<br\s*/?>', '\n', html, flags=re.I)
+
+    # 2. Convert block-level elements into paragraph separators
+    html = re.sub(r'</?(div|p|section|article|blockquote|li)[^>]*>', '\n\n', html, flags=re.I)
+
+    # 3. Remove all remaining HTML tags
+    html = re.sub(r'<[^>]+>', '', html)
+
+    # 4. Decode common HTML entities
+    html = html.replace('&nbsp;', ' ').replace('&amp;', '&')
+
+    # 5. Split into paragraphs based on blank lines
+    paragraphs = [p.strip() for p in re.split(r'\n\s*\n', html)]
+
+    # 6. Remove empty paragraphs
+    paragraphs = [p for p in paragraphs if p]
+
+    return paragraphs
+
+
 class NSTrackerTreeBuilder(TreeBuilder):
     "A tree builder which tracks the namespace declarations in the XML content"
     def __init__(self, *args, **kwargs):
@@ -106,6 +146,8 @@ class WordpressXMLParser:
                 return result
 
             body = gi("content:encoded")
+            paragraphs = extract_paragraphs(body)
+
             for key in self.config.body_replace:
                 # body = body.replace(key, body_replace[key])
                 body = re.sub(key, self.config.body_replace[key], body)
@@ -138,7 +180,8 @@ class WordpressXMLParser:
                 "parent": gi("wp:post_parent"),
                 "comments": gi("wp:comment_status") == "open",
                 "taxonomies": export_taxonomies,
-                "body": body,
+                "body": "\n\n".join(paragraphs),
+                "paragraphs": paragraphs, 
                 "excerpt": excerpt,
                 "img_srcs": img_srcs,
                 "uid": gi("wp:uid") or gi("wp:post_name") or gi("wp:post_id"),
