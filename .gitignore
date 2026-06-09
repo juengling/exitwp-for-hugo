@@ -8,3 +8,4 @@ build/
 include/
 .vagrant/
 .DS_Store
+.venv
