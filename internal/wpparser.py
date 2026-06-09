@@ -141,6 +141,7 @@ class WordpressXMLParser:
                 "body": body,
                 "excerpt": excerpt,
                 "img_srcs": img_srcs,
+                "uid": gi("wp:uid") or gi("wp:post_name") or gi("wp:post_id"),
             }
             logging.info("Extracted  %s/%s: %s (%s)", export_item["type"], export_item["wp_id"], export_item["slug"], export_item["status"])
 
