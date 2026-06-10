@@ -9,3 +9,6 @@ include/
 .vagrant/
 .DS_Store
 .venv
+/.vscode
+/.coverage
+/coverage.xml

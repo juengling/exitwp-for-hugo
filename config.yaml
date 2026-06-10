@@ -60,3 +60,8 @@ body_replace: {
 #    '[python]': '{% codeblock lang:python %}',
 #    '[/python]': '{% endcodeblock %}',
 }
+
+amazon_links:
+  mode: keep        # keep, clean, ignore, remove
+  keep_text: true   # relevant for ignore/remove
+  fallback: ignore  # ignore, remove, clean
